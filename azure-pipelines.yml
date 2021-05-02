@@ -7,7 +7,7 @@ trigger:
 - master
 
 jobs:
-- job: DeployToAzure
+- job: Build
   pool:
     vmImage: ubuntu-latest
   strategy:
@@ -15,10 +15,27 @@ jobs:
   steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '10.x'
+      versionSpec: '14.x'
     displayName: 'Install Node.js'
 
-  - script: |
-      npm install
-      npm run build
-    displayName: 'npm install and build'
+  - script: npm install
+    workingDirectory: HSLDemo/ClientApp  
+    displayName: 'npm install'
+  - script: npm run build
+    workingDirectory: HSLDemo/ClientApp  
+    displayName: 'npm build'
+    
+  - task: ArchiveFiles@2
+    inputs:
+     rootFolderOrFile: 'HSLDemo/ClientApp/build'
+     includeRootFolder: false
+     archiveType: zip
+     archiveFile: '$(Build.ArtifactStagingDirectory)/frontend/build.zip'
+     replaceExistingArchive: true
+    displayName: 'archive to zip file'
+
+  - task: PublishBuildArtifacts@1
+    inputs: 
+     pathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend'
+     artifactName: 'frontend'
+    displayName: 'publish to pipeline' 
