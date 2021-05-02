@@ -8,8 +8,7 @@ trigger:
 
 jobs:
 - job: Build
-  pool:
-    vmImage: ubuntu-latest
+  pool: Default
   strategy:
     parallel: 1
   steps:
