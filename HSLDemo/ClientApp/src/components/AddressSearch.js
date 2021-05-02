@@ -27,7 +27,7 @@ export class AddressSearch extends Component {
                         <CardSubtitle tag="h6" className="mb-2 text-muted">Address or place</CardSubtitle>
                         <Input onChange={this.addressChanged} onKeyDown={this.enterPressed} placeholder={this.props.placeholder} />
                         <br />
-                        <Button color="primary" onClick={() => this.props.handleAddressSearch(this.state.address)}>Search</Button>
+                        <Button color="primary" onClick={() => this.props.handleAddressSearch(this.state.address)}>Locate</Button>
                     </CardBody> 
                 </Card>
                 <br />

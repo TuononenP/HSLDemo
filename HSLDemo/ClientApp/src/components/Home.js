@@ -73,7 +73,7 @@ export class Home extends Component {
             .then(() => {
                 if (isEmptyResult) {
                     markers.splice(0, markers.length);
-                    this.state.addressSearchError = "Address not found";
+                    this.state.addressSearchError = "Place not found";
                 } else {
                     this.state.addressSearchError = "";
                 }

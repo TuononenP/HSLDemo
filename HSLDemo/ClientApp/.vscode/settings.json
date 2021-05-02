@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/c052f157-e3fd-442a-b2c9-a254ca0764a1/resourceGroups/hsldemo/providers/Microsoft.Web/sites/hsldemoapp",
+    "appService.deploySubpath": "build"
+}
