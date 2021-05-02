@@ -1,26 +1,102 @@
 import React, { Component } from 'react';
+import { AddressSearch } from './AddressSearch';
+import { MapView } from './MapView';
+import L from "leaflet";
+import { Marker } from '../types/Marker'
 
 export class Home extends Component {
-  static displayName = Home.name;
+    static displayName = Home.name;
+
+    constructor(props) {
+        super(props);
+
+        // default marker
+        const marker = new Marker();
+        marker.position = [60.1719, 24.9414];
+        marker.address = "Helsingin päärautatieasema";
+        marker.show = true;
+
+        this.state = {
+            mapRef: null,
+            markers: [marker],
+            centerAroundCoordinates: [60.1719, 24.9414], // Helsinki
+            zoom: 14,
+            scrollWheelZoomOn: true,
+            tileSourceUrl: "https://cdn.digitransit.fi/map/v1/hsl-map/{z}/{x}/{y}@2x.png", //alternative: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}@2x.png
+            addressSearchError: ""
+        }
+        this.placeholder = marker.address;
+    }
+
+    bindMap = (map) => {
+        this.setState({ mapRef: map });
+    }
+
+    selectAddress = (address) => {
+        if (address.length > 0) {
+            this.findCoordinates(address);
+        }
+    }
+
+    async findCoordinates(addressSearch) {
+        const { markers } = this.state;
+        let isEmptyResult = false;
+        let moveToLatlng;
+        await fetch("https://api.digitransit.fi/geocoding/v1/search?text=" + addressSearch
+            + "&focus.point.lat=" + this.state.mapRef.getCenter().lat
+            + "&focus.point.lon=" + this.state.mapRef.getCenter().lng
+            + "&size=1")
+            .then(function (response) {
+                let json = response.json();
+                console.log(json);
+                return json;
+            })
+            .then(function (geojson) {
+                if (geojson.features.length === 0) {
+                    isEmptyResult = true;
+                }
+                // docs: https://leafletjs.com/reference-1.7.1.html
+                L.geoJSON(geojson, {
+                    pointToLayer: function (feature, latlng) {
+                        markers.splice(0, markers.length);
+
+                        const marker = new Marker();
+                        marker.position = latlng;
+                        marker.address = feature.properties.label;
+                        marker.show = true;
+                        markers.push(marker);
+
+                        moveToLatlng = latlng;
+                    }
+                });
+            })
+            .then(() => {
+                if (isEmptyResult) {
+                    markers.splice(0, markers.length);
+                    this.state.addressSearchError = "Address not found";
+                } else {
+                    this.state.addressSearchError = "";
+                }
+
+                this.setState({ markers });
+                // move map to new marker
+                if (moveToLatlng) {
+                    var southWest = L.latLng(moveToLatlng.lat, moveToLatlng.lng),
+                        northEast = L.latLng(moveToLatlng.lat, moveToLatlng.lng),
+                        bounds = L.latLngBounds(southWest, northEast);
+                    this.state.mapRef.flyToBounds(bounds);
+                }
+            });
+    }
 
   render () {
     return (
-      <div>
-        <h1>Hello, world!</h1>
-        <p>Welcome to your new single-page application, built with:</p>
-        <ul>
-          <li><a href='https://get.asp.net/'>ASP.NET Core</a> and <a href='https://msdn.microsoft.com/en-us/library/67ef8sbd.aspx'>C#</a> for cross-platform server-side code</li>
-          <li><a href='https://facebook.github.io/react/'>React</a> for client-side code</li>
-          <li><a href='http://getbootstrap.com/'>Bootstrap</a> for layout and styling</li>
-        </ul>
-        <p>To help you get started, we have also set up:</p>
-        <ul>
-          <li><strong>Client-side navigation</strong>. For example, click <em>Counter</em> then <em>Back</em> to return here.</li>
-          <li><strong>Development server integration</strong>. In development mode, the development server from <code>create-react-app</code> runs in the background automatically, so your client-side resources are dynamically built on demand and the page refreshes when you modify any file.</li>
-          <li><strong>Efficient production builds</strong>. In production mode, development-time features are disabled, and your <code>dotnet publish</code> configuration produces minified, efficiently bundled JavaScript files.</li>
-        </ul>
-        <p>The <code>ClientApp</code> subdirectory is a standard React application based on the <code>create-react-app</code> template. If you open a command prompt in that directory, you can run <code>npm</code> commands such as <code>npm test</code> or <code>npm install</code>.</p>
-      </div>
+        <div>
+            <AddressSearch address={this.state.address} placeholder={this.placeholder} addressSearchError={this.state.addressSearchError}
+                handleAddressSearch={this.selectAddress} />
+            <MapView bindMap={this.bindMap} markers={this.state.markers} centerAroundCoordinates={this.state.centerAroundCoordinates}
+                zoom={this.state.zoom} scrollWheelZoomOn={this.state.scrollWheelZoomOn} tileSourceUrl={this.state.tileSourceUrl} />
+        </div>
     );
   }
 }

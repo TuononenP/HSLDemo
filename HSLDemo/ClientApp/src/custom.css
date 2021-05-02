@@ -1,4 +1,8 @@
-/* Provide sufficient contrast against white background */
+body {
+    margin: 0;
+    padding: 0;
+}
+
 a {
   color: #0366d6;
 }
@@ -11,4 +15,18 @@ code {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
+}
+
+.leaflet-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+#address-search-action-container {
+    width: 20rem;
+    height: 20rem;
+    position: absolute;
+    z-index: 500;
+    top: 5%;
+    left: 5%;
 }
