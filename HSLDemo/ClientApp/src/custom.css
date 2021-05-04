@@ -30,3 +30,15 @@ code {
     top: 5%;
     left: 5%;
 }
+
+.searchResultButton {
+    margin-bottom: 5px;
+}
+
+#search-options {
+    padding: 1rem;
+}
+
+#slider-icon {
+    color: grey;
+}

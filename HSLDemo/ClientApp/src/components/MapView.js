@@ -41,7 +41,7 @@ export class MapView extends Component {
                 {this.state.markers.map((marker, idx) =>
                     <Marker key={`marker-${idx}`} position={marker.position}>
                         <Popup>
-                            {marker.address}
+                            {marker.label}
                         </Popup>
                     </Marker>
                 )}

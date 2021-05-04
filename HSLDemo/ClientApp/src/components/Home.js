@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { AddressSearch } from './AddressSearch';
 import { MapView } from './MapView';
-import L from "leaflet";
+import L, { LatLng } from "leaflet";
 import { Marker } from '../types/Marker'
+import { SearchResult } from '../types/SearchResult'
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -13,87 +14,126 @@ export class Home extends Component {
         // default marker
         const marker = new Marker();
         marker.position = [60.1719, 24.9414];
-        marker.address = "Helsingin päärautatieasema";
+        marker.label = "Helsingin päärautatieasema";
         marker.show = true;
 
         this.state = {
-            mapRef: null,
-            markers: [marker],
+            mapRef: null, // Leaflet Map
+            markers: [marker], // type Marker
+            searchResults: [], // type SearchResult
             centerAroundCoordinates: [60.1719, 24.9414], // Helsinki
             zoom: 14,
             scrollWheelZoomOn: true,
             tileSourceUrl: "https://cdn.digitransit.fi/map/v1/hsl-map/{z}/{x}/{y}@2x.png", //alternative: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}@2x.png
-            addressSearchError: ""
+            addressSearchErrorText: "",
+            maxResults: 5,
+            selectedLayerType: "coarse,address,venue", // list of layers: https://github.com/pelias/documentation/blob/master/search.md#filter-by-data-type
+            selectedResult: null  // type SearchResult
         }
-        this.placeholder = marker.address;
+        this.placeholder = "";
     }
 
     bindMap = (map) => {
         this.setState({ mapRef: map });
     }
 
-    selectAddress = (address) => {
-        if (address.length > 0) {
+    fetchResults = (address) => {
+        if (address && address.length > 0) {
             this.findCoordinates(address);
         }
     }
 
+    selectLabelOption = (label) => {
+        if (label && label.length > 0) {
+            this.state.markers.map((marker) => {
+                if (marker.label === label) {
+                    marker.show = true;
+                } else {
+                    marker.show = false;
+                }
+                return true;
+            });
+        }
+    }
+
+    setMaxResults = (event) => {
+        this.setState({ maxResults: event.target.value });
+    }
+
+    setTypeSelected = (event) => {
+        this.setState({ selectedLayerType: event.target.value });
+    }
+
+    setResultSelected = (result) => {
+        this.setState({ selectedResult: result });
+        this.moveToMarker(result.position);
+    }
+
+    moveToMarker = (latLng) => {
+        if (latLng) {
+            var southWest = L.latLng(latLng.lat, latLng.lng),
+                northEast = L.latLng(latLng.lat, latLng.lng),
+                bounds = L.latLngBounds(southWest, northEast);
+            this.state.mapRef.flyToBounds(bounds);
+        }
+    }
+ 
     async findCoordinates(addressSearch) {
-        const { markers } = this.state;
+        const { markers, searchResults, selectedLayerType } = this.state;
         let isEmptyResult = false;
-        let moveToLatlng;
         await fetch("https://api.digitransit.fi/geocoding/v1/search?text=" + addressSearch
             + "&focus.point.lat=" + this.state.mapRef.getCenter().lat
             + "&focus.point.lon=" + this.state.mapRef.getCenter().lng
-            + "&size=1")
+            + "&layers=" + selectedLayerType
+            + "&size=" + this.state.maxResults)
             .then(function (response) {
-                let json = response.json();
-                console.log(json);
-                return json;
+                return response.json();
             })
             .then(function (geojson) {
                 if (geojson.features.length === 0) {
                     isEmptyResult = true;
                 }
+                markers.splice(0, markers.length);
+                searchResults.splice(0, searchResults.length);
                 // docs: https://leafletjs.com/reference-1.7.1.html
                 L.geoJSON(geojson, {
                     pointToLayer: function (feature, latlng) {
-                        markers.splice(0, markers.length);
-
+                        return L.marker(latlng);
+                    },
+                    filter: function (feature) {
+                        return true;
+                    },
+                    onEachFeature: function (feature, layer) {
                         const marker = new Marker();
-                        marker.position = latlng;
-                        marker.address = feature.properties.label;
+                        marker.position = new LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+                        marker.label = feature.properties.label;
+                        marker.layer = layer;
                         marker.show = true;
                         markers.push(marker);
-
-                        moveToLatlng = latlng;
+                        const result = new SearchResult(feature.properties.label, marker.position, false);
+                        searchResults.push(result);
                     }
                 });
             })
             .then(() => {
                 if (isEmptyResult) {
                     markers.splice(0, markers.length);
-                    this.state.addressSearchError = "Place not found";
+                    this.state.addressSearchErrorText = "No results";
                 } else {
-                    this.state.addressSearchError = "";
+                    this.state.addressSearchErrorText = "";
                 }
 
                 this.setState({ markers });
-                // move map to new marker
-                if (moveToLatlng) {
-                    var southWest = L.latLng(moveToLatlng.lat, moveToLatlng.lng),
-                        northEast = L.latLng(moveToLatlng.lat, moveToLatlng.lng),
-                        bounds = L.latLngBounds(southWest, northEast);
-                    this.state.mapRef.flyToBounds(bounds);
-                }
             });
     }
 
   render () {
     return (
         <div>
-            <AddressSearch address={this.state.address} placeholder={this.placeholder} addressSearchError={this.state.addressSearchError}
-                handleAddressSearch={this.selectAddress} />
+            <AddressSearch address={this.state.label} placeholder={this.placeholder} addressSearchErrorText={this.state.addressSearchErrorText}
+                searchResults={this.state.searchResults} maxResults={this.state.maxResults} selectedLayerType={this.state.selectedLayerType}
+                selectedResult={this.state.selectedResult} handleSelectResult={this.setResultSelected}
+                handleAddressSearch={this.fetchResults} setMaxResults={this.setMaxResults} handleTypeSelected={this.setTypeSelected} />
             <MapView bindMap={this.bindMap} markers={this.state.markers} centerAroundCoordinates={this.state.centerAroundCoordinates}
                 zoom={this.state.zoom} scrollWheelZoomOn={this.state.scrollWheelZoomOn} tileSourceUrl={this.state.tileSourceUrl} />
         </div>
