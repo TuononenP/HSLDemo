@@ -48,8 +48,9 @@ export class Home extends Component {
         } else {
             this.setState({ markers: this.state.markers.splice(0, this.state.markers.length)});
             this.setState({ addressSearchErrorText: "No results" });
-            this.setState({ showResults: false });
             this.setState({ searchResults: [] });
+            this.setState({ zoom: 14 });
+            this.state.mapRef.setZoom(14);
         }
     }
 
