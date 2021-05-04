@@ -45,6 +45,11 @@ export class Home extends Component {
     fetchResults = (address) => {
         if (address && address.length > 0) {
             this.findCoordinates(address);
+        } else {
+            this.setState({ markers: this.state.markers.splice(0, this.state.markers.length)});
+            this.setState({ addressSearchErrorText: "No results" });
+            this.setState({ showResults: false });
+            this.setState({ searchResults: [] });
         }
     }
 
