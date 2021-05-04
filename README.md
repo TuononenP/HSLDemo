@@ -12,7 +12,7 @@ Technical demonstration of using HSL (Helsinki Regional Transport Authority) API
    * Pins are added to the map that match search criteria and max results option 
  * Map zooms to the result that is clicked. Result is highlighted
  * Error is shown if search result did not contain matches
- * Possibility to hide search results and show them again
+ * Possibility to hide search results and show them again. Great for mobile phones with less screen area
  * Option to set max results count and type of searched keywoard 
 
 ## Technology
