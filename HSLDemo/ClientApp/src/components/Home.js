@@ -45,13 +45,15 @@ export class Home extends Component {
     fetchResults = (address) => {
         if (address && address.length > 0) {
             this.findCoordinates(address);
-        } else {
-            this.setState({ markers: this.state.markers.splice(0, this.state.markers.length)});
-            this.setState({ addressSearchErrorText: "No results" });
-            this.setState({ searchResults: [] });
-            this.setState({ zoom: 14 });
-            this.state.mapRef.setZoom(14);
         }
+        else {
+            this.setState({ addressSearchErrorText: "No results" });
+            this.setState({ showResults: false });
+            this.setState({ searchResults: [] });
+            this.setState({ markers: [] });
+        }
+        this.setState({ zoom: 14 });
+        this.state.mapRef.setZoom(14);
     }
 
     selectLabelOption = (label) => {
@@ -157,7 +159,10 @@ export class Home extends Component {
                     this.setState({addressSearchErrorText: ""});
                     this.setState({showResults: true});
                 }
+                this.setState({ selectedResult: searchResults[0] });
+                markers[0].highlighted = true;
                 this.setState({ markers });
+                this.moveToMarker(markers[0].position);
             });
     }
 
