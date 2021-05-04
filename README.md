@@ -8,11 +8,13 @@ Hosted on Azure: https://hsldemoapp.azurewebsites.net
 Technical demonstration of using HSL (Helsinki Regional Transport Authority) APIs for map tiles and address search.
 
 ## Features
- * Locate address or a place on a map. 
-   * One pin is added to the map to coordinates that matches best the search criteria.
- * Map zooms to the searched place.
- * Error is shown if place was not found.
+ * Locate address or a place on a map 
+   * Pins are added to the map that match search criteria and max results option 
+ * Map zooms to the result that is clicked. Result is highlighted
+ * Error is shown if search result did not contain matches
+ * Possibility to hide search results and show them again. Great for mobile phones with less screen area
+ * Option to set max results count and type of searched keywoard 
 
 ## Technology
  * ReactJS frontend
- * .NET 5 backend
+ * .NET 5 backend (not needed as of yet)
