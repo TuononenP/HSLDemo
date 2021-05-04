@@ -4,6 +4,9 @@ import { MapView } from './MapView';
 import L, { LatLng } from "leaflet";
 import { Marker } from '../types/Marker'
 import { SearchResult } from '../types/SearchResult'
+import { SearchResults } from './SearchResults';
+import { Alert } from 'reactstrap';
+import { AddressSearchOptions } from './AddressSearchOptions';
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -28,7 +31,9 @@ export class Home extends Component {
             addressSearchErrorText: "",
             maxResults: 5,
             selectedLayerType: "coarse,address,venue", // list of layers: https://github.com/pelias/documentation/blob/master/search.md#filter-by-data-type
-            selectedResult: null  // type SearchResult
+            selectedResult: null,  // type SearchResult
+            showResults: false,
+            showOptions: false
         }
         this.placeholder = "";
     }
@@ -69,6 +74,20 @@ export class Home extends Component {
         this.moveToMarker(result.position);
     }
 
+    setShowOptions = () => {
+        this.setState(state => ({
+            showOptions: !state.showOptions
+        }));
+    }
+
+    setHideResults = () => {
+        this.setState({ showResults: false });
+    }
+
+    setShowResults = () => {
+        this.setState({ showResults: true });
+    }
+
     moveToMarker = (latLng) => {
         if (latLng) {
             var southWest = L.latLng(latLng.lat, latLng.lng),
@@ -79,13 +98,13 @@ export class Home extends Component {
     }
  
     async findCoordinates(addressSearch) {
-        const { markers, searchResults, selectedLayerType } = this.state;
+        const { markers, searchResults, selectedLayerType, maxResults } = this.state;
         let isEmptyResult = false;
         await fetch("https://api.digitransit.fi/geocoding/v1/search?text=" + addressSearch
             + "&focus.point.lat=" + this.state.mapRef.getCenter().lat
             + "&focus.point.lon=" + this.state.mapRef.getCenter().lng
             + "&layers=" + selectedLayerType
-            + "&size=" + this.state.maxResults)
+            + "&size=" + maxResults)
             .then(function (response) {
                 return response.json();
             })
@@ -118,25 +137,43 @@ export class Home extends Component {
             .then(() => {
                 if (isEmptyResult) {
                     markers.splice(0, markers.length);
-                    this.state.addressSearchErrorText = "No results";
+                    this.setState({addressSearchErrorText: "No results"});
+                    this.setState({showResults: false});
                 } else {
-                    this.state.addressSearchErrorText = "";
+                    this.setState({addressSearchErrorText: ""});
+                    this.setState({showResults: true});
                 }
-
                 this.setState({ markers });
             });
     }
 
-  render () {
-    return (
-        <div>
-            <AddressSearch address={this.state.label} placeholder={this.placeholder} addressSearchErrorText={this.state.addressSearchErrorText}
-                searchResults={this.state.searchResults} maxResults={this.state.maxResults} selectedLayerType={this.state.selectedLayerType}
-                selectedResult={this.state.selectedResult} handleSelectResult={this.setResultSelected}
-                handleAddressSearch={this.fetchResults} setMaxResults={this.setMaxResults} handleTypeSelected={this.setTypeSelected} />
-            <MapView bindMap={this.bindMap} markers={this.state.markers} centerAroundCoordinates={this.state.centerAroundCoordinates}
-                zoom={this.state.zoom} scrollWheelZoomOn={this.state.scrollWheelZoomOn} tileSourceUrl={this.state.tileSourceUrl} />
-        </div>
-    );
-  }
+    addressSearchError() {
+        return (
+            this.state.addressSearchErrorText.length > 0 &&
+            <Alert color="danger">
+                {this.state.addressSearchErrorText}
+            </Alert>
+        )
+    }
+
+    render () {
+        return (
+            <div>
+                <div id="address-search-action-container">
+                    <AddressSearch address={this.state.label} placeholder={this.placeholder}
+                        handleAddressSearch={this.fetchResults} handleShowOptions={this.setShowOptions} />
+                    <AddressSearchOptions showOptions={this.state.showOptions} maxResults={this.state.maxResults}
+                        selectedLayerType={this.state.selectedLayerType} handleSetMaxResults={this.setMaxResults}
+                        handleTypeSelected={this.setTypeSelected} />
+                    <SearchResults searchResults={this.state.searchResults} selectedResult={this.state.selectedResult}
+                        showResults={this.state.showResults} handleSelectResult={this.setResultSelected}
+                        handleHideResults={this.setHideResults} handleShowResults={this.setShowResults} />
+                    {this.addressSearchError()}
+                </div>
+                <MapView bindMap={this.bindMap} markers={this.state.markers}
+                    centerAroundCoordinates={this.state.centerAroundCoordinates} zoom={this.state.zoom}
+                    scrollWheelZoomOn={this.state.scrollWheelZoomOn} tileSourceUrl={this.state.tileSourceUrl} />
+            </div>
+        );
+    }
 }

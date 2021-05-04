@@ -42,3 +42,11 @@ code {
 #slider-icon {
     color: grey;
 }
+
+#hide-results {
+    float: right;
+}
+
+#show-results {
+    float: right;
+}
