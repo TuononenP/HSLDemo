@@ -2,6 +2,7 @@
 import { Card, Input, CardBody, CardSubtitle, Button } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
+import 'font-awesome/css/font-awesome.min.css'; 
 
 export class AddressSearch extends Component {
 

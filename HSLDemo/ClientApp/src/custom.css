@@ -50,3 +50,14 @@ code {
 #show-results {
     float: right;
 }
+
+.default-icon-style {
+    font-size: 1rem;
+    color: #4273af;
+}
+
+ .highlighted-icon-style {
+    font-size: 1rem;
+    color: #d42121;
+    
+}

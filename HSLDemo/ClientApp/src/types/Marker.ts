@@ -5,11 +5,13 @@ export class Marker implements MarkerProps {
     label?: string;
     layer?: string;
     show?: boolean;
+    highlighted?: boolean;
 
-    constructor(position: LatLngExpression, label: string, layer: string, show: boolean) {
+    constructor(position: LatLngExpression, label: string, layer: string, show: boolean, highlighted: boolean) {
         this.position = position;
         this.label = label;
         this.layer = layer;
         this.show = show;
+        this.highlighted = highlighted;
     }
 }

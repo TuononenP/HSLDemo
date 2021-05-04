@@ -4,4 +4,5 @@ export interface MarkerProps {
     label?: string;
     layer?: string;
     show?: boolean;
+    highlighted?: boolean;
 }

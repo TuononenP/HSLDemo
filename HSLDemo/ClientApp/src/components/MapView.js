@@ -1,7 +1,6 @@
 ﻿import React, { Component } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import markerIconPng from "leaflet/dist/images/marker-icon.png";
 import L from "leaflet";
 
 export class MapView extends Component {
@@ -20,12 +19,16 @@ export class MapView extends Component {
     }
 
     render() {
-        let DefaultIcon = L.icon({
-            iconUrl: markerIconPng,
-            iconSize: [25, 41],
-            iconAnchor: [12, 41]
-        });
-        L.Marker.prototype.options.icon = DefaultIcon;
+        const defaultIcon = L.divIcon({
+            html: '<span class="default-icon-style"><i class="fa fa-map-marker fa-4x"></i></span>',
+                iconSize: [40, 40],
+                className: 'map-marker-icon'
+            });
+        const highlightedIcon = L.divIcon({
+            html: '<span class="highlighted-icon-style"><i class="fa fa-map-marker fa-4x"></i></span>',
+            iconSize: [40, 40],
+            className: 'map-marker-icon'
+            });
         return (
             <MapContainer zoomControl={false} center={this.state.centerAroundCoordinates} zoom={this.state.zoom} minZoom={10}
                 maxBounds={[this.finlandTopLeftCornerCoordinates, this.finlandBottomRightCornerCoordinates]}
@@ -39,7 +42,7 @@ export class MapView extends Component {
                     url={this.state.tileSourceUrl}
                 />
                 {this.state.markers.map((marker, idx) =>
-                    <Marker key={`marker-${idx}`} position={marker.position}>
+                    <Marker key={`marker-${idx}`} position={marker.position} icon={marker.highlighted ? highlightedIcon : defaultIcon}>
                         <Popup>
                             {marker.label}
                         </Popup>

@@ -35,7 +35,7 @@ export class Home extends Component {
             showResults: false,
             showOptions: false
         }
-        this.placeholder = "";
+        this.placeholder = marker.label;
     }
 
     bindMap = (map) => {
@@ -71,6 +71,14 @@ export class Home extends Component {
 
     setResultSelected = (result) => {
         this.setState({ selectedResult: result });
+        this.state.markers.map((marker) => {
+            if (marker.position === result.position) {
+                    marker.highlighted = true;
+                } else {
+                    marker.highlighted = false;
+                }
+            return false;
+        });
         this.moveToMarker(result.position);
     }
 
