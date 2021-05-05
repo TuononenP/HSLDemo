@@ -25,7 +25,7 @@ Technical demonstration of using HSL (Helsinki Regional Transport Authority) API
 ### Starting the frontend app
 
 Install NodeJs and npm and run the following commands on command prompt
-  cd HSLDemo/ClientApp
-  npm install
-  npm run build
-  npm start
+  * cd HSLDemo/ClientApp
+  * npm install
+  * npm run build
+  * npm start
