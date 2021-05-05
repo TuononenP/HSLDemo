@@ -19,3 +19,13 @@ Technical demonstration of using HSL (Helsinki Regional Transport Authority) API
 ## Technology
  * ReactJS frontend
  * .NET 5 backend (not needed as of yet)
+
+## Development
+
+### Starting the frontend app
+
+Install NodeJs and npm and run the following commands on command prompt
+  cd HSLDemo/ClientApp
+  npm install
+  npm run build
+  npm start
